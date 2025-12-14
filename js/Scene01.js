@@ -7,6 +7,7 @@ class Scene01 extends Phaser.Scene {
 		this.load.image('background', 'assets/sprites/background-game.png');
 
 		this.load.image('ground', 'assets/sprites/chao.png');
+		this.load.image('brick', 'assets/sprites/bloco.png');
 		this.load.image('platformSmall', 'assets/sprites/plataforma-p.png');
 		this.load.image('platformMedium', 'assets/sprites/plataforma-m.png');
 		this.load.image('platformLarge', 'assets/sprites/plataforma-g.png');
@@ -80,6 +81,7 @@ class Scene01 extends Phaser.Scene {
 
 		/* GRUPOS */
 		this.grounds = this.physics.add.staticGroup();
+		this.bricks = this.physics.add.staticGroup();
 		this.platformsSmall = this.physics.add.staticGroup();
 		this.platformsMedium = this.physics.add.staticGroup();
 		this.platformsLarge = this.physics.add.staticGroup();
@@ -88,15 +90,49 @@ class Scene01 extends Phaser.Scene {
 		this.grounds.create(0, 600, 'ground').setScale(2, 1).setOrigin(0, 1).refreshBody();
 		this.grounds.create(800, 600, 'ground').setScale(2, 1).setOrigin(0, 1).refreshBody();
 
+		/* BLOCOS */
+		this.bricks.create(784, 182, 'brick').refreshBody();
+		this.bricks.create(784, 190, 'brick').refreshBody();
+		this.bricks.create(784, 222, 'brick').refreshBody();
+		this.bricks.create(784, 254, 'brick').refreshBody();
+		this.bricks.create(784, 286, 'brick').refreshBody();
+		this.bricks.create(784, 318, 'brick').refreshBody();
+		this.bricks.create(784, 350, 'brick').refreshBody();
+		this.bricks.create(784, 382, 'brick').refreshBody();
+		this.bricks.create(784, 414, 'brick').refreshBody();
+		this.bricks.create(784, 446, 'brick').refreshBody();
+		this.bricks.create(784, 478, 'brick').refreshBody();
+		this.bricks.create(784, 500, 'brick').refreshBody();
+		this.bricks.create(784, 532, 'brick').refreshBody();
+		this.bricks.create(784, 564, 'brick').refreshBody();
+		this.bricks.create(784, 596, 'brick').refreshBody();
+
+		this.bricks.create(1584, 182, 'brick').refreshBody();
+		this.bricks.create(1584, 190, 'brick').refreshBody();
+		this.bricks.create(1584, 222, 'brick').refreshBody();
+		this.bricks.create(1584, 254, 'brick').refreshBody();
+		this.bricks.create(1584, 286, 'brick').refreshBody();
+		this.bricks.create(1584, 318, 'brick').refreshBody();
+		this.bricks.create(1584, 350, 'brick').refreshBody();
+		this.bricks.create(1584, 382, 'brick').refreshBody();
+		this.bricks.create(1584, 414, 'brick').refreshBody();
+		this.bricks.create(1584, 446, 'brick').refreshBody();
+		this.bricks.create(1584, 478, 'brick').refreshBody();
+		this.bricks.create(1584, 500, 'brick').refreshBody();
+		this.bricks.create(1584, 532, 'brick').refreshBody();
+		this.bricks.create(1584, 564, 'brick').refreshBody();
+		this.bricks.create(1584, 596, 'brick').refreshBody();
+
 		/* PLATAFORMAS */
+		this.platformsLarge.create(250, 150, 'platformSmall').refreshBody();
 		this.platformsSmall.create(350, 450, 'platformSmall').refreshBody();
-		this.platformsSmall.create(700, 450, 'platformSmall').refreshBody();
+		this.platformsSmall.create(718, 450, 'platformSmall').refreshBody();
 		this.platformsLarge.create(400, 300, 'platformLarge').refreshBody();
 		this.platformsLarge.create(600, 150, 'platformLarge').refreshBody();
 
 		/* PLATAFORMA MÓVEL */
 		this.movingPlatform = this.physics.add
-			.image(200, 350, 'platformMedium')
+			.image(1000, 450, 'platformMedium')
 			.setImmovable(true)
 			.setVelocityX(100);
 
@@ -106,10 +142,14 @@ class Scene01 extends Phaser.Scene {
 		this.collectables = this.physics.add.group();
 
 		const itemsConfig = [
-			{ key: 'produto', x: 600, y: 100 },
-			{ key: 'dev', x: 350, y: 400 },
+			{ key: 'dev', x: 250, y: 100 },
+			{ key: 'produto', x: 350, y: 400 },
 			{ key: 'suporte', x: 700, y: 400 },
-			{ key: 'cloudInfra', x: 400, y: 250 },
+			{ key: 'cloudInfra', x: 250, y: 250 },
+			{ key: 'marketing', x: 500, y: 250 },
+			{ key: 'comercial', x: 600, y: 100 },
+
+			{ key: 'financeiro', x: 1400, y: 500 },
 		];
 
 		itemsConfig.forEach(({ key, x, y }) => {
@@ -121,6 +161,7 @@ class Scene01 extends Phaser.Scene {
 
 		/* COLISÕES */
 		this.physics.add.collider(this.player, this.grounds);
+		this.physics.add.collider(this.player, this.bricks);
 		this.physics.add.collider(this.player, this.platformsSmall);
 		this.physics.add.collider(this.player, this.platformsMedium);
 		this.physics.add.collider(this.player, this.platformsLarge);
@@ -131,6 +172,7 @@ class Scene01 extends Phaser.Scene {
 
 		// coletáveis x cenário
 		this.physics.add.collider(this.collectables, this.grounds);
+		this.physics.add.collider(this.collectables, this.bricks);
 		this.physics.add.collider(this.collectables, this.platformsSmall);
 		this.physics.add.collider(this.collectables, this.platformsMedium);
 		this.physics.add.collider(this.collectables, this.platformsLarge);
@@ -173,9 +215,9 @@ class Scene01 extends Phaser.Scene {
 			this.player.anims.play('idle', true);
 		}
 
-		if (this.movingPlatform.x >= 600) {
+		if (this.movingPlatform.x >= 1400) {
 			this.movingPlatform.setVelocityX(-100);
-		} else if (this.movingPlatform.x <= 200) {
+		} else if (this.movingPlatform.x <= 1000) {
 			this.movingPlatform.setVelocityX(100);
 		}
 	}
@@ -183,7 +225,6 @@ class Scene01 extends Phaser.Scene {
 	coletarItem(player, item) {
 		item.disableBody(true, true);
 
-		// lógica específica por tipo (se precisar)
 		switch (item.type) {
 			case 'produto':
 				console.log('Coletou produto');
