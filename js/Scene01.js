@@ -38,6 +38,19 @@ class Scene01 extends Phaser.Scene {
 	}
 
 	create() {
+		// Contador de equipes coletadas
+		this.equipesColetadas = 0;
+		this.totalEquipes = 12;
+		this.equipesText = this.add
+			.text(16, 16, `Equipes: 0/12`, {
+				// fontFamily: 'Press Start 2P',
+				fontSize: '18px',
+				fill: '#fff',
+				backgroundColor: 'rgba(0,0,0,0.5)',
+				padding: { x: 8, y: 4 },
+			})
+			.setScrollFactor(0)
+			.setDepth(100);
 		this.background = this.add.image(0, 0, 'background').setOrigin(0, 0);
 
 		this.player = this.physics.add
@@ -91,6 +104,7 @@ class Scene01 extends Phaser.Scene {
 		/* CHÃO */
 		this.grounds.create(0, 600, 'ground').setScale(2, 1).setOrigin(0, 1).refreshBody();
 		this.grounds.create(800, 600, 'ground').setScale(2, 1).setOrigin(0, 1).refreshBody();
+		this.grounds.create(1600, 600, 'ground').setScale(2, 1).setOrigin(0, 1).refreshBody();
 
 		/* BLOCOS */
 		this.bricks.create(784, 182, 'brick').refreshBody();
@@ -125,7 +139,7 @@ class Scene01 extends Phaser.Scene {
 		this.bricks.create(1584, 532, 'brick').refreshBody();
 		this.bricks.create(1584, 564, 'brick').refreshBody();
 		this.bricks.create(1584, 596, 'brick').refreshBody();
-		
+
 		this.doors.create(1584, 72, 'door').refreshBody();
 
 		/* PLATAFORMAS */
@@ -168,8 +182,6 @@ class Scene01 extends Phaser.Scene {
 
 		itemsConfig.forEach(({ key, x, y }) => {
 			const item = this.collectables.create(x, y, key).setScale(0.4);
-
-			// metadata opcional (pode usar depois)
 			item.type = key;
 		});
 
@@ -242,19 +254,52 @@ class Scene01 extends Phaser.Scene {
 	coletarItem(player, item) {
 		item.disableBody(true, true);
 
-		switch (item.type) {
-			case 'produto':
-				console.log('Coletou produto');
-				break;
-			case 'dev':
-				console.log('Coletou dev');
-				break;
-			case 'suporte':
-				console.log('Coletou suporte');
-				break;
-			case 'cloudInfra':
-				console.log('Coletou cloud infra');
-				break;
+		// Atualiza contador de equipes
+		this.equipesColetadas++;
+		this.equipesText.setText(`Equipes: ${this.equipesColetadas}/${this.totalEquipes}`);
+
+		// Remove a porta se coletou todos os itens
+		if (this.equipesColetadas >= this.totalEquipes) {
+			this.doors.clear(true, true);
 		}
+
+		// switch (item.type) {
+		// 	case 'produto':
+		// 		console.log('Reuniu Produto');
+		// 		break;
+		// 	case 'dev':
+		// 		console.log('Reuniu Desenvolvimento');
+		// 		break;
+		// 	case 'suporte':
+		// 		console.log('Reuniu Suporte');
+		// 		break;
+		// 	case 'cloudInfra':
+		// 		console.log('Reuniu Cloud/Infraestrutura');
+		// 		break;
+		// 	case 'marketing':
+		// 		console.log('Reuniu Marketing');
+		// 		break;
+		// 	case 'comercial':
+		// 		console.log('Reuniu Comercial');
+		// 		break;
+		// 	case 'financeiro':
+		// 		console.log('Reuniu Financeiro');
+		// 		break;
+		// 	case 'cs':
+		// 		console.log('Reuniu CS');
+		// 		break;
+		// 	case 'implantacao':
+		// 		console.log('Reuniu Implantação');
+		// 		break;
+		// 	case 'ecossistema':
+		// 		console.log('Reuniu Ecossistema');
+		// 		break;
+		// 	case 'iopa':
+		// 		console.log('Reuniu Iopa');
+		// 		break;
+		// 	case 'sdr':
+		// 		console.log('Reuniu SDR');
+		// 		break;
+		// }
 	}
 }
