@@ -6,6 +6,7 @@ class Scene01 extends Phaser.Scene {
 	preload() {
 		this.load.audio('soundJump', 'assets/audios/audioPulo.wav');
 		this.load.audio('soundCollect', 'assets/audios/audioMoeda.wav');
+		this.load.audio('soundBell', 'assets/audios/sino.mp3');
 
 		this.load.image('background', 'assets/sprites/background-game.png');
 
@@ -51,6 +52,7 @@ class Scene01 extends Phaser.Scene {
 	create() {
 		this.soundJump = this.sound.add('soundJump');
 		this.soundCollect = this.sound.add('soundCollect');
+		this.soundBell = this.sound.add('soundBell');
 
 		this.nanCount = 0; // Contador de vezes que o HP virou NaN
 		this.shoots = this.physics.add.group();
@@ -219,8 +221,12 @@ class Scene01 extends Phaser.Scene {
 		this.physics.add.collider(this.player, this.movingPlatform);
 		this.physics.add.collider(this.player, this.doors);
 		this.physics.add.collider(this.player, this.bells, () => {
+			this.soundBell.play({ rate: 1.2, volume: 0.5 });
+
 			if (this.nanCount >= 10) {
-				this.gameOver();
+				setTimeout(() => {
+					this.gameOver();
+				}, 4000);
 				return;
 			}
 			return;
@@ -386,7 +392,7 @@ class Scene01 extends Phaser.Scene {
 
 		if (isNaN(monster.hp)) {
 			this.nanCount++;
-			
+
 			if (this.nanCount >= 10) {
 				this.monster.anims.stop();
 				this.monster.setFrame(15);
