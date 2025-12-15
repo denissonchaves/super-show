@@ -365,7 +365,6 @@ class Scene01 extends Phaser.Scene {
 		}
 
 		if (shoot.hitMonsters.has(monster)) return;
-
 		shoot.hitMonsters.add(monster);
 
 		monster.hp--;
@@ -379,8 +378,29 @@ class Scene01 extends Phaser.Scene {
 			}
 		}
 
-		monster.setTint(0xff0000);
-		this.time.delayedCall(100, () => monster.clearTint());
+		if (this.monster.hitFlash) return;
+		this.monster.hitFlash = true;
+
+		this.tweens.addCounter({
+			from: 0,
+			to: 1,
+			duration: 120,
+			yoyo: true,
+			repeat: 2,
+
+			onYoyo: () => {
+				this.monster.setTint(0xff0000);
+			},
+
+			onRepeat: () => {
+				this.monster.clearTint();
+			},
+
+			onComplete: () => {
+				this.monster.clearTint();
+				this.monster.hitFlash = false;
+			},
+		});
 
 		if (monster.hp <= 0) {
 			monster.isDead = true;
@@ -397,7 +417,7 @@ class Scene01 extends Phaser.Scene {
 				showWinGame();
 			}
 		}, 500);
-		
+
 		const style = { fontSize: '48px', fill: '#fff' };
 		this.add.text(
 			this.cameras.main.centerX - 150,
