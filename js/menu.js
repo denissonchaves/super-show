@@ -129,5 +129,6 @@ function startGame() {
 	game = new Phaser.Game(config);
 	main.classList.add('-hidden');
 	footer.classList.add('-hidden');
+	gameWin.classList.add('-hidden');
 	gameContainer.classList.remove('-hidden');
 }
