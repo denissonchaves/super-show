@@ -4,6 +4,8 @@ class Scene01 extends Phaser.Scene {
 	}
 
 	preload() {
+		this.load.audio('soundJump', 'assets/audios/audioPulo.wav');
+
 		this.load.image('background', 'assets/sprites/background-game.png');
 
 		this.load.image('ground', 'assets/sprites/chao.png');
@@ -37,10 +39,17 @@ class Scene01 extends Phaser.Scene {
 			frameWidth: 164,
 			frameHeight: 198,
 		});
+
+		this.load.spritesheet('monster', 'assets/sprites/churn.png', {
+			frameWidth: 352,
+			frameHeight: 252,
+		});
 	}
 
 	create() {
-		// Grupo de tiros
+		this.soundJump = this.sound.add('soundJump');
+
+		this.nanCount = 0; // Contador de vezes que o HP virou NaN
 		this.shoots = this.physics.add.group();
 		// Cooldown para evitar múltiplos tiros por frame
 		this.shootCooldown = 0;
@@ -218,6 +227,36 @@ class Scene01 extends Phaser.Scene {
 		this.physics.world.setBounds(0, 0, this.background.width, this.background.height);
 		this.cameras.main.setBounds(0, 0, this.background.width, this.background.height);
 		this.cameras.main.startFollow(this.player);
+
+		this.monster = this.physics.add.sprite(2200, 450, 'monster');
+
+		// this.monster.setCollideWorldBounds(true);
+		this.monster.setImmovable(true);
+		this.monster.body.allowGravity = false;
+
+		this.monster.body.setSize(105, 105).setOffset(100, 125);
+
+		// ⚠️ HP PRECISA SER DEFINIDO AQUI
+		this.monster.hp = 10;
+		this.monster.isDead = false;
+		this.monster.lastHit = 0;
+
+		this.anims.create({
+			key: 'monster-idle',
+			frames: this.anims.generateFrameNumbers('monster', { start: 4, end: 13 }),
+			frameRate: 6,
+			repeat: -1,
+		});
+
+		this.monster.play('monster-idle');
+
+		this.monsterOverlap = this.physics.add.overlap(
+			this.shoots,
+			this.monster,
+			this.acertarMonstro,
+			null,
+			this
+		);
 	}
 
 	update() {
@@ -230,18 +269,19 @@ class Scene01 extends Phaser.Scene {
 		const up = this.control.up.isDown || this.wasd.up.isDown;
 
 		if (left) {
-			// this.player.setVelocityX(-200);
-			this.player.setVelocityX(-800);
+			this.player.setVelocityX(-200);
+			// this.player.setVelocityX(-800);
 			this.player.setFlipX(true);
 		} else if (right) {
-			// this.player.setVelocityX(200);
-			this.player.setVelocityX(800);
+			this.player.setVelocityX(200);
+			// this.player.setVelocityX(800);
 			this.player.setFlipX(false);
 		} else {
 			this.player.setVelocityX(0);
 		}
 
 		if (up && this.player.canJump && this.player.body.blocked.down) {
+			this.soundJump.play();
 			this.player.setVelocityY(-575);
 			this.player.canJump = false;
 		}
@@ -254,8 +294,10 @@ class Scene01 extends Phaser.Scene {
 			this.player.anims.play('jump', true);
 		} else if (left || right) {
 			this.player.anims.play('run', true);
+			this.player.body.setSize(100, 198);
 		} else {
 			this.player.anims.play('idle', true);
+			this.player.body.setSize(105, 198);
 		}
 
 		if (this.movingPlatform.x >= 1400) {
@@ -270,10 +312,11 @@ class Scene01 extends Phaser.Scene {
 				Phaser.Input.Keyboard.JustDown(this.wasd.space)) &&
 			this.shootCooldown === 0
 		) {
-			this.shootCooldown = 50; // Pequeno cooldown para evitar spam
-			// Posição inicial do tiro (ajustar conforme sprite do player)
+			this.shootCooldown = 50;
+
 			const offsetX = this.player.flipX ? -40 : 40;
 			const shoot = this.shoots.create(this.player.x + offsetX, this.player.y, 'shoot');
+
 			shoot.setVelocityX(this.player.flipX ? -500 : 500);
 			shoot.setVelocityY(0);
 			shoot.setGravityY(0);
@@ -281,6 +324,11 @@ class Scene01 extends Phaser.Scene {
 			shoot.body.onWorldBounds = true;
 			shoot.body.allowGravity = false;
 			shoot.setScale(0.75);
+
+			// ⚠️ AQUI: chave única + Set de monstros atingidos
+			shoot.key = Phaser.Math.RND.uuid();
+			shoot.hitMonsters = new Set();
+
 			// Remove o tiro ao sair da tela
 			shoot.body.world.on('worldbounds', function (body) {
 				if (body.gameObject === shoot) {
@@ -306,39 +354,63 @@ class Scene01 extends Phaser.Scene {
 		// 	case 'produto':
 		// 		console.log('Reuniu Produto');
 		// 		break;
-		// 	case 'dev':
-		// 		console.log('Reuniu Desenvolvimento');
-		// 		break;
-		// 	case 'suporte':
-		// 		console.log('Reuniu Suporte');
-		// 		break;
-		// 	case 'cloudInfra':
-		// 		console.log('Reuniu Cloud/Infraestrutura');
-		// 		break;
-		// 	case 'marketing':
-		// 		console.log('Reuniu Marketing');
-		// 		break;
-		// 	case 'comercial':
-		// 		console.log('Reuniu Comercial');
-		// 		break;
-		// 	case 'financeiro':
-		// 		console.log('Reuniu Financeiro');
-		// 		break;
-		// 	case 'cs':
-		// 		console.log('Reuniu CS');
-		// 		break;
-		// 	case 'implantacao':
-		// 		console.log('Reuniu Implantação');
-		// 		break;
-		// 	case 'ecossistema':
-		// 		console.log('Reuniu Ecossistema');
-		// 		break;
-		// 	case 'iopa':
-		// 		console.log('Reuniu Iopa');
-		// 		break;
-		// 	case 'sdr':
-		// 		console.log('Reuniu SDR');
-		// 		break;
 		// }
+	}
+
+	acertarMonstro(shoot, monster) {
+		if (monster.isDead) return;
+
+		if (!shoot.hitMonsters) {
+			shoot.hitMonsters = new Set();
+		}
+
+		if (shoot.hitMonsters.has(monster)) return;
+
+		shoot.hitMonsters.add(monster);
+
+		monster.hp--;
+		console.log('HP do monstro:', monster.hp);
+
+		if (isNaN(monster.hp)) {
+			this.nanCount++;
+			console.log('Contador de NaN:', this.nanCount);
+
+			if (this.nanCount >= 10) {
+				this.gameOver();
+				return;
+			}
+		}
+
+		monster.setTint(0xff0000);
+		this.time.delayedCall(100, () => monster.clearTint());
+
+		if (monster.hp <= 0) {
+			monster.isDead = true;
+			this.matarMonstro(monster);
+		}
+	}
+
+	gameOver() {
+		console.log('Fim de jogo!');
+		this.physics.world.pause();
+		this.scene.pause();
+		// Aqui você pode exibir tela de Game Over ou reiniciar a cena se quiser
+		const style = { fontSize: '48px', fill: '#fff' };
+		this.add.text(
+			this.cameras.main.centerX - 150,
+			this.cameras.main.centerY,
+			'GAME OVER',
+			style
+		);
+	}
+
+	matarMonstro(monster) {
+		if (this.monsterOverlap) {
+			this.physics.world.removeCollider(this.monsterOverlap);
+			this.monsterOverlap = null;
+		}
+		monster.destroy();
+		this.monster = null;
+		console.log('Monstro destruído!');
 	}
 }
